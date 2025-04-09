@@ -1,0 +1,7 @@
+{
+  "name": "BFPSms",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular"
+}

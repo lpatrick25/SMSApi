@@ -1,0 +1,108 @@
+.card-shadow {
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  transition: all 0.3s ease;
+  margin-bottom: 20px;
+}
+
+.card-shadow:hover {
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  transform: translateY(-4px);
+}
+
+.card-header {
+  background-color: #fafafa;
+  border-top-left-radius: 16px;
+  border-top-right-radius: 16px;
+  padding: 16px;
+}
+
+.card-title {
+  font-weight: 600;
+  font-size: 19px;
+  color: #222;
+}
+
+.card-subtitle {
+  color: #888;
+  font-size: 14px;
+  margin-top: 4px;
+}
+
+.card-content {
+  padding: 16px;
+}
+
+.bold-text {
+  font-weight: 600;
+  margin-right: 8px;
+}
+
+.info-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+ion-button {
+  border-radius: 8px;
+  font-weight: 600;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  transition: 0.2s ease-in-out;
+}
+
+ion-button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+}
+
+ion-badge {
+  font-weight: 600;
+  padding: 6px 12px;
+  font-size: 12px;
+}
+
+body {
+  font-family: 'Roboto', sans-serif;
+}
+
+ion-label {
+  font-family: 'Roboto', sans-serif;
+  font-weight: 500;
+}
+
+.justified-text {
+  padding-left: 45px;
+  text-align: justify;
+}
+
+.snackbar-success {
+  background-color: green;
+  color: white;
+}
+
+.snackbar-error {
+  background-color: red;
+  color: white;
+}
+
+.snackbar-warning {
+  background-color: orange;
+  color: white;
+}
+
+/* Ensure there's no overlap with the status bar */
+ion-header {
+  padding-top: env(safe-area-inset-top);
+}
+
+ion-content {
+  padding-top: env(safe-area-inset-top);
+}
+
+/* For Android devices or devices with notches */
+body {
+  padding-top: env(safe-area-inset-top);
+}

@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">SMS API</string>
+    <string name="title_activity_main">SMS API</string>
+    <string name="package_name">com.capstone.smsapi</string>
+    <string name="custom_url_scheme">com.capstone.smsapi</string>
+</resources>
