@@ -39,6 +39,7 @@
     "@coreui/icons": "^3.0.1",
     "@coreui/icons-angular": "^5.3.16",
     "@ionic/angular": "^8.0.0",
+    "bootstrap": "^5.3.5",
     "cordova-plugin-android-permissions": "^1.1.5",
     "cordova-sms-plugin": "^1.0.4",
     "ionicons": "^7.0.0",

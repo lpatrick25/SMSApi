@@ -24,8 +24,11 @@ export class SmsService {
 
   // Fetch all pending SMS requests from the backend
   getPendingSmsRequests(): Observable<any[]> {
+    const token = localStorage.getItem('token'); // Retrieve the token from localStorage
+
     const headers = new HttpHeaders({
-      'Accept': 'application/json'
+      'Accept': 'application/json',
+      'Authorization': `Bearer ${token}` // Correct way to set the Authorization header
     });
 
     // return this.http.get<any[]>(`${environment.apiUrl}/sms-requests`, { headers });
@@ -90,8 +93,11 @@ export class SmsService {
 
   // Function to update the SMS status in the database
   updateSmsStatus(id: number) {
+    const token = localStorage.getItem('token'); // Retrieve the token from localStorage
+
     const headers = new HttpHeaders({
-      'Accept': 'application/json'
+      'Accept': 'application/json',
+      'Authorization': `Bearer ${token}` // Correct way to set the Authorization header
     });
 
     // this.http.put(`${environment.apiUrl}/sms-requests/${id}`, { status: 'sent' }, { headers })

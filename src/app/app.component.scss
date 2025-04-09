@@ -106,3 +106,14 @@ ion-content {
 body {
   padding-top: env(safe-area-inset-top);
 }
+
+/* src/global.scss or src/styles.scss */
+
+ion-app {
+  background-color: #f0f0f0; /* Set your desired background color */
+  background-image: url('/assets/background.webp'); /* Correct relative path */
+  background-size: cover; /* Ensure the image covers the screen */
+  background-position: center; /* Center the image */
+  background-repeat: no-repeat; /* Prevent the image from repeating */
+}
+
