@@ -110,10 +110,14 @@ body {
 /* src/global.scss or src/styles.scss */
 
 ion-app {
-  background-color: #f0f0f0; /* Set your desired background color */
+  background-color: #f0f0f0; /* Fallback color */
   background-image: url('/assets/background.webp'); /* Correct relative path */
-  background-size: cover; /* Ensure the image covers the screen */
+  background-size: cover; /* Make sure the image covers the screen */
   background-position: center; /* Center the image */
-  background-repeat: no-repeat; /* Prevent the image from repeating */
+  background-repeat: no-repeat; /* Prevent repeating the image */
+  height: 100vh; /* Ensure the background covers the full height */
+  display: flex; /* Use flex to center the content */
+  justify-content: center; /* Center content horizontally */
+  align-items: center; /* Center content vertically */
 }
 

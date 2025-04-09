@@ -4,6 +4,7 @@ import { environment } from '../../environments/environment';
 import { Capacitor } from '@capacitor/core';
 import { Observable } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { AuthService } from './auth.service';
 
 declare var sms: any;
 
@@ -11,9 +12,9 @@ declare var sms: any;
   providedIn: 'root'
 })
 export class SmsService {
-  private delay = 5000;  // 5-second delay between each SMS
+  private delay = 5000;
 
-  constructor(private http: HttpClient, private snackBar: MatSnackBar) { }
+  constructor(private http: HttpClient, private snackBar: MatSnackBar, private authService: AuthService) { }
 
   private defaultApiUrl = environment.apiUrl;
 
@@ -22,20 +23,17 @@ export class SmsService {
     return storedUrl && storedUrl.trim() !== '' ? storedUrl : this.defaultApiUrl;
   }
 
-  // Fetch all pending SMS requests from the backend
   getPendingSmsRequests(): Observable<any[]> {
-    const token = localStorage.getItem('token'); // Retrieve the token from localStorage
+    const token = this.authService.getToken();
 
     const headers = new HttpHeaders({
       'Accept': 'application/json',
-      'Authorization': `Bearer ${token}` // Correct way to set the Authorization header
+      'Authorization': `Bearer ${token}`
     });
 
-    // return this.http.get<any[]>(`${environment.apiUrl}/sms-requests`, { headers });
     return this.http.get<any[]>(`${this.apiUrl}/sms-requests`, { headers });
   }
 
-  // Automatically check for pending SMS and send them with a delay
   async processPendingSmsQueue() {
     console.log('Checking for pending SMS...');
 
@@ -53,8 +51,6 @@ export class SmsService {
     });
   }
 
-
-  // Function to send an SMS
   async sendSms(phoneNumber: string, message: string, id: number) {
     return new Promise<void>((resolve) => {
       if (Capacitor.isNativePlatform()) {
@@ -62,22 +58,22 @@ export class SmsService {
           phoneNumber,
           message,
           { android: { intent: '' } },
-          (msg: string) => {  // Success callback
+          (msg: string) => {
             console.log('SMS sent:', msg);
-            this.updateSmsStatus(id);  // Mark SMS as sent in DB
+            this.updateSmsStatus(id);
             this.snackBar.open('SMS sent successfully!', 'Close', {
-              duration: 3000,  // Show for 3 seconds
+              duration: 3000,
               panelClass: ['snackbar-success'],
             });
             resolve();
           },
-          (err: any) => {  // Error callback
+          (err: any) => {
             console.error('SMS failed:', err);
             this.snackBar.open('SMS failed to send.', 'Close', {
-              duration: 3000,  // Show for 3 seconds
+              duration: 3000,
               panelClass: ['snackbar-error'],
             });
-            resolve();  // Continue with the next SMS
+            resolve();
           }
         );
       } else {
@@ -91,23 +87,20 @@ export class SmsService {
     });
   }
 
-  // Function to update the SMS status in the database
   updateSmsStatus(id: number) {
-    const token = localStorage.getItem('token'); // Retrieve the token from localStorage
+    const token = this.authService.getToken();
 
     const headers = new HttpHeaders({
       'Accept': 'application/json',
-      'Authorization': `Bearer ${token}` // Correct way to set the Authorization header
+      'Authorization': `Bearer ${token}`
     });
 
-    // this.http.put(`${environment.apiUrl}/sms-requests/${id}`, { status: 'sent' }, { headers })
     this.http.put(`${this.apiUrl}/sms-requests/${id}`, { status: 'sent' }, { headers })
       .subscribe(response => {
         console.log('Updated SMS status:', response);
       });
   }
 
-  // Helper function to add a delay
   delayExecution(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));
   }

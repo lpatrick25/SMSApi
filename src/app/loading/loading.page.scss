@@ -1,0 +1,71 @@
+ion-app {
+  background-color: #f0f0f0; /* Fallback color */
+  background-image: url('/assets/background.webp'); /* Correct relative path */
+  background-size: cover; /* Make sure the image covers the screen */
+  background-position: center; /* Center the image */
+  background-repeat: no-repeat; /* Prevent repeating the image */
+  height: 100vh; /* Ensure the background covers the full height */
+  display: flex; /* Use flex to center the content */
+  justify-content: center; /* Center content horizontally */
+  align-items: center; /* Center content vertically */
+}
+
+.center-wrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  width: 100%;
+}
+
+ion-content {
+  --background: transparent; /* So background from ion-app is visible */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  z-index: 1;
+  text-align: center;
+  position: relative;
+}
+
+.logo-container {
+  margin-bottom: 20px; /* Space between logo and spinner */
+}
+
+.logo {
+  max-width: 200px; /* Adjust logo size */
+}
+
+.loading-spinner {
+  margin-bottom: 20px; /* Space between spinner and loading message */
+}
+
+.loading-message {
+  font-size: 18px;
+  font-weight: bolder;
+  color: #ffffff;
+  margin-top: 10px;
+}
+
+.network-check-animation img {
+  max-width: 200px;
+  margin-top: 20px;
+}
+
+@media (max-width: 600px) {
+  .loading-message {
+    font-size: 16px;
+  }
+
+  .network-check-animation img {
+    max-width: 150px;
+  }
+
+  .logo {
+    max-width: 150px; /* Adjust logo size for small screens */
+  }
+}

@@ -1,5 +1,5 @@
 {
-  "name": "BFPSms",
+  "name": "SMS-API",
   "integrations": {
     "capacitor": {}
   },
