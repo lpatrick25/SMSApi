@@ -5,6 +5,7 @@ import { Capacitor } from '@capacitor/core';
 import { Observable } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { AuthService } from './auth.service';
+import { Storage } from '@capacitor/storage'; // Import Storage
 
 declare var sms: any;
 
@@ -60,6 +61,10 @@ export class SmsService {
           { android: { intent: '' } },
           (msg: string) => {
             console.log('SMS sent:', msg);
+
+            // Store sent SMS in local storage
+            this.storeSentMessage(id, phoneNumber, message, 'sent');
+
             this.updateSmsStatus(id);
             this.snackBar.open('SMS sent successfully!', 'Close', {
               duration: 3000,
@@ -85,6 +90,54 @@ export class SmsService {
         resolve();
       }
     });
+  }
+
+  // Store sent SMS in local storage
+  async storeSentMessage(id: number, phoneNumber: string, message: string, status: string) {
+    const sms = {
+      id,
+      phoneNumber,
+      message,
+      status,
+      sentAt: new Date().toISOString()
+    };
+
+    // Retrieve existing messages from storage
+    const storedMessages = await this.getSentMessages();
+
+    // Add the new sent message
+    storedMessages.push(sms);
+
+    // Save the updated list back to storage
+    await Storage.set({
+      key: 'sentMessages',
+      value: JSON.stringify(storedMessages),
+    });
+  }
+
+  // Get stored sent messages
+  async getSentMessages(): Promise<any[]> {
+    const result = await Storage.get({ key: 'sentMessages' });
+    return result.value ? JSON.parse(result.value) : [];
+  }
+
+  async loadSentMessages() {
+    const sentMessages = await this.getSentMessages();
+    console.log('Sent Messages:', sentMessages);
+    // Use this data to display sent messages in your UI
+  }
+
+  // Helper method to group messages by phone number
+  groupMessagesByPhoneNumber(messages: any[]): any {
+    return messages.reduce((groupedMessages, message) => {
+      const phoneNumber = message.phoneNumber;
+
+      if (!groupedMessages[phoneNumber]) {
+        groupedMessages[phoneNumber] = [];
+      }
+      groupedMessages[phoneNumber].push(message);
+      return groupedMessages;
+    }, {});
   }
 
   updateSmsStatus(id: number) {

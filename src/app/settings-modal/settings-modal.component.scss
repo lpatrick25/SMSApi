@@ -1,0 +1,55 @@
+.settings-modal-content {
+  --padding-start: 0;
+  --padding-end: 0;
+  --background: #f6f7fb;
+}
+
+.modal-header {
+  ion-toolbar {
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  }
+
+  ion-title {
+    font-size: 1.3rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+}
+
+.modal-body {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.modal-card {
+  width: 100%;
+  max-width: 340px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+  border-radius: 16px;
+
+  ion-card-header {
+    text-align: center;
+    padding-bottom: 0;
+  }
+
+  ion-card-title {
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: #333;
+  }
+
+  ion-card-content {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding-top: 8px;
+  }
+}
+
+ion-button {
+  font-weight: 500;
+  letter-spacing: 0.3px;
+}

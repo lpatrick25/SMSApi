@@ -36,3 +36,107 @@
 // @import "@ionic/angular/css/palettes/dark.class.css";
 // @import "@ionic/angular/css/palettes/dark.system.css";
 // @import "@ionic/angular/css/palettes/dark.css";
+
+/* Success Snackbar */
+.snackbar-success {
+  background-color: #4caf50;
+  /* Green */
+  color: white !important;
+  /* White text for contrast */
+  font-weight: 500;
+  /* Bold text for readability */
+  padding: 12px 24px;
+  /* Add padding for spacing */
+  border-radius: 8px;
+  /* Rounded corners */
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  /* Soft shadow */
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: all 0.3s ease;
+}
+
+/* Error Snackbar */
+.snackbar-error {
+  background-color: #f44336;
+  /* Red */
+  color: white !important;
+  /* White text for contrast */
+  font-weight: 500;
+  /* Bold text */
+  padding: 12px 24px;
+  /* Add padding for spacing */
+  border-radius: 8px;
+  /* Rounded corners */
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  /* Soft shadow */
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: all 0.3s ease;
+}
+
+/* Warning Snackbar */
+.snackbar-warning {
+  background-color: #ff9800;
+  /* Orange */
+  color: white !important;
+  /* White text for contrast */
+  font-weight: 500;
+  /* Bold text */
+  padding: 12px 24px;
+  /* Add padding for spacing */
+  border-radius: 8px;
+  /* Rounded corners */
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  /* Soft shadow */
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: all 0.3s ease;
+}
+
+/* Custom Close Button */
+.snackbar-success .mat-simple-snackbar-action,
+.snackbar-error .mat-simple-snackbar-action,
+.snackbar-warning .mat-simple-snackbar-action {
+  color: white;
+  /* Close button color */
+  font-weight: bold;
+  /* Bold close button */
+  text-transform: uppercase;
+  /* Uppercase text */
+  transition: color 0.3s ease;
+}
+
+/* Hover effect on Close Button */
+.snackbar-success .mat-simple-snackbar-action:hover,
+.snackbar-error .mat-simple-snackbar-action:hover,
+.snackbar-warning .mat-simple-snackbar-action:hover {
+  color: #ffffff;
+  /* Lightens the color on hover */
+}
+
+/* Smooth Fade In and Out Animation */
+.mat-simple-snackbar {
+  opacity: 0;
+  animation: fadeInOut 4s forwards;
+}
+
+@keyframes fadeInOut {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  50% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+}

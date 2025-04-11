@@ -2,60 +2,53 @@
   <ion-toolbar color="primary">
     <ion-title>📨 SMS API Dashboard</ion-title>
     <ion-buttons slot="end">
-      <ion-button color="light" style="color: white; font-weight: bolder;" (click)="presentApiUrlDialog()">
-        🔧 Set API URL
+      <ion-button color="light" style="color: white; font-weight: bolder;" (click)="presentSettingsModal()">
+        ⚙️ Settings
       </ion-button>
     </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
 <ion-content class="ion-padding">
+  <!-- Show loading spinner when data is loading -->
+  <div *ngIf="loading" class="loading-container">
+    <img src="assets/loading.gif" alt="Loading..." class="loading-spinner" />
+    <p class="typewriter">Fetching messages...</p>
+  </div>
 
-  <ion-list lines="none">
-    <ion-card *ngFor="let sms of pendingSmsRequests" class="card-shadow">
-      <ion-card-header class="card-header">
-        <ion-card-title class="card-title">
-          {{ sms.status | uppercase }} — Request #{{ sms.id }}
-        </ion-card-title>
-      </ion-card-header>
+  <!-- Show SMS data once it's loaded -->
+  <ion-list lines="none" *ngIf="!loading && pendingSmsRequests.length > 0; else showNoMessages">
+    <ion-card *ngFor="let sms of pendingSmsRequests" class="inbox-card">
+      <ion-card-content>
+        <div class="inbox-header">
+          <div class="request-id">📌 Pending Request #{{ sms.id }}</div>
+          <ion-badge [color]="sms.status === 'sent' ? 'success' : 'warning'" class="status-badge">
+            {{ sms.status | uppercase }}
+          </ion-badge>
+        </div>
 
-      <ion-card-content class="card-content">
-        <ion-grid>
-          <ion-row>
-            <ion-col size="12" size-md="6">
-              <div class="info-row">
-                <ion-label class="bold-text">📞 Phone:</ion-label>
-                <ion-text color="primary">{{ sms.phone_number }}</ion-text>
-              </div>
-            </ion-col>
+        <div class="inbox-line">
+          <span class="label">📞 Number:</span>
+          <span class="value">{{ sms.phone_number }}</span>
+        </div>
 
-            <ion-col size="12" size-md="6">
-              <ion-row>
-                <ion-col size="12" size-md="6">
-                  <ion-label class="bold-text">💬 Message:</ion-label>
-                </ion-col>
-                <ion-col size="12" size-md="6">
-                  <ion-text class="justified-text">
-                    {{ sms.message }}
-                  </ion-text>
-                </ion-col>
-              </ion-row>
-            </ion-col>
-          </ion-row>
-
-          <ion-row class="ion-align-items-center">
-            <ion-col size="12" size-md="6">
-              <div class="info-row">
-                <ion-label class="bold-text">📌 Status:</ion-label>
-                <ion-badge [color]="sms.status === 'sent' ? 'success' : 'warning'">
-                  {{ sms.status | uppercase }}
-                </ion-badge>
-              </div>
-            </ion-col>
-          </ion-row>
-        </ion-grid>
+        <div class="inbox-line message">
+          <span class="label">💬 Message:</span>
+          <div class="value message-text">
+            {{ sms.message }}
+          </div>
+        </div>
       </ion-card-content>
     </ion-card>
   </ion-list>
-
+  <!-- Template to show when done loading but no messages -->
+  <ng-template #showNoMessages>
+    <div *ngIf="!loading && pendingSmsRequests.length === 0" class="no-messages-container">
+      <ion-icon name="mail-open-outline" class="no-msg-icon"></ion-icon>
+      <ion-text color="medium">
+        <h3>No Pending Messages</h3>
+        <p>You're all caught up!</p>
+      </ion-text>
+    </div>
+  </ng-template>
 </ion-content>

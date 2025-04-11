@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { NavController, ToastController } from '@ionic/angular';
 import { ConnectivityService } from '../services/connectivity.service';
 import { Router } from '@angular/router';
+import { AuthService } from '../services/auth.service';
 
 @Component({
   selector: 'app-loading',
@@ -17,7 +18,8 @@ export class LoadingPage implements OnInit {
     private connectivityService: ConnectivityService,
     private navCtrl: NavController,
     private toastCtrl: ToastController,
-    private router: Router
+    private router: Router,
+    private authService: AuthService
   ) { }
 
   ngOnInit() {
@@ -52,8 +54,14 @@ export class LoadingPage implements OnInit {
       const response = await fetch(backendUrl, { method: 'GET' });
 
       if (response.ok) {
-        // Server is reachable, navigate to login
-        this.router.navigate(['/login']);
+        // Server is reachable
+        this.authService.isLoggedIn().then((isLoggedIn) => {
+          if (isLoggedIn) {
+            this.router.navigate(['/home']);
+          } else {
+            this.router.navigate(['/login']);
+          }
+        });
       } else {
         throw new Error('Server responded with error');
       }

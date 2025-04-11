@@ -78,21 +78,6 @@ ion-label {
   text-align: justify;
 }
 
-.snackbar-success {
-  background-color: green;
-  color: white;
-}
-
-.snackbar-error {
-  background-color: red;
-  color: white;
-}
-
-.snackbar-warning {
-  background-color: orange;
-  color: white;
-}
-
 /* Ensure there's no overlap with the status bar */
 ion-header {
   padding-top: env(safe-area-inset-top);
@@ -110,14 +95,84 @@ body {
 /* src/global.scss or src/styles.scss */
 
 ion-app {
-  background-color: #f0f0f0; /* Fallback color */
-  background-image: url('/assets/background.webp'); /* Correct relative path */
-  background-size: cover; /* Make sure the image covers the screen */
-  background-position: center; /* Center the image */
-  background-repeat: no-repeat; /* Prevent repeating the image */
-  height: 100vh; /* Ensure the background covers the full height */
-  display: flex; /* Use flex to center the content */
-  justify-content: center; /* Center content horizontally */
-  align-items: center; /* Center content vertically */
+  background-color: #f0f0f0;
+  /* Fallback color */
+  background-image: url('/assets/background.webp');
+  /* Correct relative path */
+  background-size: cover;
+  /* Make sure the image covers the screen */
+  background-position: center;
+  /* Center the image */
+  background-repeat: no-repeat;
+  /* Prevent repeating the image */
+  height: 100vh;
+  /* Ensure the background covers the full height */
+  display: flex;
+  /* Use flex to center the content */
+  justify-content: center;
+  /* Center content horizontally */
+  align-items: center;
+  /* Center content vertically */
 }
 
+ion-footer {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 0;
+  box-shadow: 0px -2px 8px rgba(0, 0, 0, 0.1);
+}
+
+ion-toolbar {
+  padding: 0;
+  background: #fff;
+  box-shadow: none;
+}
+
+ion-grid {
+  padding: 0;
+}
+
+ion-col {
+  padding: 0;
+}
+
+ion-button {
+  font-size: 1rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  padding: 12px;
+  border-radius: 8px;
+  box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+ion-button:hover {
+  transform: translateY(-3px);
+}
+
+ion-button:active {
+  transform: translateY(1px);
+}
+
+ion-button[expand="full"] {
+  border-radius: 0;
+  /* Make buttons fill full width */
+}
+
+ion-button[color="primary"] {
+  // background-color: #3880ff;
+  color: white;
+}
+
+ion-button[color="secondary"] {
+  // background-color: #4caf50;
+  color: white;
+}
+
+@media (max-width: 768px) {
+  ion-button {
+    font-size: 0.95rem;
+  }
+}

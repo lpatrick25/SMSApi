@@ -1,0 +1,60 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>📨 Sent Messages</ion-title>
+    <ion-buttons slot="end">
+      <ion-button color="light" style="color: white; font-weight: bolder;" (click)="presentSettingsModal()">
+        ⚙️ Settings
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+
+  <!-- View 1: List of Phone Numbers -->
+  <ng-container *ngIf="!selectedPhoneNumber">
+    <ion-list *ngIf="objectKeys(groupedMessages).length > 0; else noMessages">
+      <ion-item *ngFor="let phone of objectKeys(groupedMessages)" (click)="selectPhoneNumber(phone)">
+        <ion-label>
+          <h2>{{ phone }}</h2>
+          <p>Last message: {{ groupedMessages[phone][groupedMessages[phone].length - 1]?.message }}</p>
+        </ion-label>
+      </ion-item>
+    </ion-list>
+
+    <!-- This will display when there are no messages -->
+    <ng-template #noMessages>
+      <div class="no-messages-container">
+        <ion-icon name="mail-open-outline" class="no-msg-icon"></ion-icon>
+        <ion-text color="medium">
+          <h3>No sent messages found.</h3>
+          <p>All sent message will be displayed here!</p>
+        </ion-text>
+      </div>
+    </ng-template>
+  </ng-container>
+
+  <!-- View 2: Conversation with Selected Phone Number -->
+  <ng-container *ngIf="selectedPhoneNumber">
+    <ion-header translucent>
+      <ion-toolbar>
+        <ion-buttons slot="start">
+          <ion-back-button defaultHref="#" (click)="goBack()"></ion-back-button>
+        </ion-buttons>
+        <ion-title>{{ selectedPhoneNumber }}</ion-title>
+      </ion-toolbar>
+    </ion-header>
+
+    <ion-content>
+      <ion-list>
+        <ion-item *ngFor="let msg of groupedMessages[selectedPhoneNumber]">
+          <ion-label>
+            <h3>{{ msg.sentAt | date:'short' }}</h3>
+            <p>{{ msg.message }}</p>
+          </ion-label>
+        </ion-item>
+      </ion-list>
+    </ion-content>
+  </ng-container>
+
+</ion-content>

@@ -9,6 +9,10 @@ import { AlertController } from '@ionic/angular';
 import { environment } from '../../environments/environment';
 import { StatusBar } from '@capacitor/status-bar';
 import { Capacitor } from '@capacitor/core';
+import { AuthService } from '../services/auth.service';
+import { ModalController } from '@ionic/angular';
+import { SettingsModalComponent } from '../settings-modal/settings-modal.component';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-root',
@@ -18,6 +22,7 @@ import { Capacitor } from '@capacitor/core';
 })
 export class HomePage implements OnInit, OnDestroy {
   pendingSmsRequests: any[] = [];
+  loading = true;
   private intervalSubscription!: Subscription;
   private isProcessing = false;
   defaultApiUrl = environment.apiUrl;
@@ -28,6 +33,9 @@ export class HomePage implements OnInit, OnDestroy {
     private platform: Platform,
     private androidPermissions: AndroidPermissions,
     private alertController: AlertController,
+    private authService: AuthService,
+    private modalCtrl: ModalController,
+    private router: Router,
   ) {
     if (Capacitor.isNativePlatform()) {
       this.initializeApp();
@@ -63,15 +71,22 @@ export class HomePage implements OnInit, OnDestroy {
     });
   }
 
-  openAndroidSettings() {
-    if (this.platform.is('android')) {
-      window.open(
-        'intent://#Intent;action=android.settings.APPLICATION_DETAILS_SETTINGS;scheme=package;package=com.com.capstone.smsapi;end',
-        '_system'
-      );
-    } else {
-      this.showPermissionAlert();
-    }
+  async presentSettingsModal() {
+    const modal = await this.modalCtrl.create({
+      component: SettingsModalComponent,
+      cssClass: 'settings-modal'
+    });
+
+    modal.onDidDismiss().then(result => {
+      const action = result.data?.action;
+      if (action === 'setApiUrl') {
+        this.presentApiUrlDialog();
+      } else if (action === 'logout') {
+        this.authService.logout();
+      }
+    });
+
+    await modal.present();
   }
 
   async presentApiUrlDialog() {
@@ -129,6 +144,7 @@ export class HomePage implements OnInit, OnDestroy {
       this.presentApiUrlDialog();
     }
 
+    // Start fetching data
     this.intervalSubscription = interval(15000)
       .pipe(switchMap(() => this.smsService.getPendingSmsRequests()))
       .subscribe(async (data) => {
@@ -136,6 +152,7 @@ export class HomePage implements OnInit, OnDestroy {
         if (this.pendingSmsRequests.length > 0) {
           await this.processPendingSmsQueue();
         }
+        this.loading = false; // Data fetched, stop loading
       });
   }
 

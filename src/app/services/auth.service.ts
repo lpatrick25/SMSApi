@@ -1,40 +1,45 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { Storage } from '@capacitor/storage';
+import { BehaviorSubject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
 
-  private tokenKey = 'token'; // The key used to store the token
+  private tokenKey = 'token';
+  private isLoggedInSubject = new BehaviorSubject<boolean>(false);
+  isLoggedIn$ = this.isLoggedInSubject.asObservable();
 
-  constructor(private router: Router) {}
-
-  // Store the token securely
-  async setToken(token: string): Promise<void> {
-    console.log("Setting token:", token);  // Logging for debugging
-    await Storage.set({ key: this.tokenKey, value: token });
-    console.log("Token set successfully.");
+  constructor(private router: Router) {
+    this.loadLoginStatus(); // Initialize login status on service load
   }
 
-  // Retrieve the token from Storage
+  // Load login status at service startup
+  private async loadLoginStatus() {
+    const token = await this.getToken();
+    this.isLoggedInSubject.next(!!token);
+  }
+
+  async setToken(token: string): Promise<void> {
+    await Storage.set({ key: this.tokenKey, value: token });
+    this.isLoggedInSubject.next(true); // Set logged in status
+  }
+
   async getToken(): Promise<string | null> {
     const { value } = await Storage.get({ key: this.tokenKey });
-    console.log("Retrieved token:", value);  // Logging for debugging
     return value;
   }
 
-  // Check if the user is logged in (by checking if the token exists)
   async isLoggedIn(): Promise<boolean> {
     const token = await this.getToken();
-    return !!token;  // If token exists, user is logged in
+    return !!token;
   }
 
-  // Logout: Remove the token and navigate to the login page
   async logout(): Promise<void> {
     await Storage.remove({ key: this.tokenKey });
-    console.log("Token removed, logging out...");
-    this.router.navigate(['/login']);  // Redirect to login page
+    this.isLoggedInSubject.next(false); // Update status
+    this.router.navigate(['/login']);
   }
 }

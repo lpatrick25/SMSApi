@@ -1,27 +1,139 @@
-#container {
-  text-align: center;
+.inbox-card {
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(0, 0, 0, 0.683);
+  border-radius: 10px;
+  margin-bottom: 16px;
+  padding: 0;
+  transition: transform 0.2s ease;
+}
 
+.inbox-card:hover {
+  transform: scale(1.005);
+}
+
+ion-card-content {
+  padding: 16px;
+}
+
+.inbox-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.request-id {
+  font-weight: 600;
+  font-size: 1rem;
+  color: #222;
+}
+
+.status-badge {
+  font-size: 0.75rem;
+  letter-spacing: 0.4px;
+  padding: 6px 10px;
+  border-radius: 6px;
+}
+
+.inbox-line {
+  margin-bottom: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.label {
+  font-weight: 600;
+  color: #444;
+  margin-right: 8px;
+  min-width: 90px;
+}
+
+.value {
+  color: #333;
+  flex: 1;
+}
+
+.message-text {
+  white-space: pre-wrap;
+  background: #fff;
+  padding: 10px 14px;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+  font-family: system-ui, sans-serif;
+  font-size: 0.95rem;
+}
+
+.loading-container {
   position: absolute;
-  left: 0;
-  right: 0;
   top: 50%;
-  transform: translateY(-50%);
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
 }
 
-#container strong {
-  font-size: 20px;
-  line-height: 26px;
+.loading-spinner {
+  width: 250px;
+  height: 250px;
+  animation: spin 1s infinite linear;
 }
 
-#container p {
-  font-size: 16px;
-  line-height: 22px;
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
 
-  color: #8c8c8c;
-
-  margin: 0;
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
-#container a {
-  text-decoration: none;
+.typewriter {
+  display: inline-block;
+  font-size: 1.2rem;
+  color: #333;
+  overflow: hidden;
+  /* Ensures the content doesn't overflow */
+  white-space: nowrap;
+  /* Keeps the text on one line */
+  border-right: 3px solid #333;
+  /* Simulates the cursor */
+  width: 0;
+  /* Start with no visible text */
+  animation: typing 4s steps(30) 1s forwards, blink 0.75s step-end infinite;
+  /* Typing + blinking cursor */
+}
+
+@keyframes typing {
+  0% {
+    width: 0;
+  }
+
+  100% {
+    width: 20ch;
+    /* Adjust based on the length of your sentence */
+  }
+}
+
+@keyframes blink {
+  50% {
+    border-color: transparent;
+  }
+}
+
+.no-messages-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 80vh;
+  text-align: center;
+  color: var(--ion-color-medium);
+}
+
+.no-msg-icon {
+  font-size: 64px;
+  margin-bottom: 16px;
+  color: var(--ion-color-medium);
 }

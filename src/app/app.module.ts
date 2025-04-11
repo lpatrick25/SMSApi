@@ -13,9 +13,10 @@ import { SMS } from '@awesome-cordova-plugins/sms/ngx';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import { AuthInterceptor } from './interceptors/auth.interceptor';
+import { SettingsModalComponent } from './settings-modal/settings-modal.component';
 
 @NgModule({
-  declarations: [AppComponent],
+  declarations: [AppComponent, SettingsModalComponent],
   imports: [BrowserModule, IonicModule.forRoot(), AppRoutingModule, HttpClientModule, MatSnackBarModule],
   providers: [
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },

@@ -1,4 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
+import { AuthService } from './services/auth.service';
 
 @Component({
   selector: 'app-root',
@@ -6,6 +8,22 @@ import { Component } from '@angular/core';
   styleUrls: ['app.component.scss'],
   standalone: false,
 })
-export class AppComponent {
-  constructor() {}
+export class AppComponent implements OnInit {
+  isLoggedIn = false;
+
+  constructor(private router: Router, private authService: AuthService) { }
+
+  ngOnInit() {
+    this.authService.isLoggedIn$.subscribe(status => {
+      this.isLoggedIn = status;
+    });
+  }
+
+  navigateToInbox() {
+    this.router.navigate(['/home']);
+  }
+
+  navigateToOutbox() {
+    this.router.navigate(['/sent-messages']);
+  }
 }
