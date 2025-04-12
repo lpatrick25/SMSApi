@@ -31,3 +31,10 @@ ion-text p {
   margin-bottom: 16px;
   color: var(--ion-color-medium);
 }
+
+.center-spinner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 80%;
+}

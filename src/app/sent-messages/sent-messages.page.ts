@@ -4,6 +4,7 @@ import { AlertController, ModalController } from '@ionic/angular';
 import { AuthService } from '../services/auth.service';
 import { SettingsModalComponent } from '../settings-modal/settings-modal.component';
 import { environment } from '../../environments/environment';
+import { ToastController } from '@ionic/angular';
 
 
 @Component({
@@ -17,17 +18,31 @@ export class SentMessagesPage implements OnInit {
   selectedPhoneNumber: string | null = null;
   objectKeys = Object.keys;
   defaultApiUrl = environment.apiUrl;
+  loading = true;
 
   constructor(
     private smsService: SmsService,
     private modalCtrl: ModalController,
     private alertController: AlertController,
     private authService: AuthService,
+    private toastCtrl: ToastController,
   ) { }
 
   async ngOnInit() {
+    try {
+      const messages = await this.smsService.getSentMessages();
+      this.groupedMessages = this.smsService.groupMessagesByPhoneNumber(messages);
+    } catch (err) {
+      console.error('Failed to load messages:', err);
+    } finally {
+      this.loading = false;
+    }
+  }
+
+  async refreshMessages(event: any) {
     const messages = await this.smsService.getSentMessages();
     this.groupedMessages = this.smsService.groupMessagesByPhoneNumber(messages);
+    event.target.complete();
   }
 
   selectPhoneNumber(phoneNumber: string) {
@@ -85,6 +100,14 @@ export class SentMessagesPage implements OnInit {
         }
       ]
     });
+
+    // After saving API URL
+    const toast = await this.toastCtrl.create({
+      message: 'API URL updated successfully',
+      duration: 2000,
+      color: 'success'
+    });
+    await toast.present();
 
     await alert.present();
   }
