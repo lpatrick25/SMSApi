@@ -2,7 +2,7 @@
   <ion-router-outlet></ion-router-outlet>
 </ion-app>
 <!-- Fixed Bottom Footer with Inbox and Outbox buttons -->
-<ion-footer *ngIf="isLoggedIn">
+<ion-footer *ngIf="isLoggedIn && networkStatus">
   <ion-toolbar>
     <ion-grid>
       <ion-row>
@@ -16,3 +16,4 @@
     </ion-grid>
   </ion-toolbar>
 </ion-footer>
+

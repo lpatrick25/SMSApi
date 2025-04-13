@@ -5,6 +5,7 @@ import { AuthService } from '../services/auth.service';
 import { SettingsModalComponent } from '../settings-modal/settings-modal.component';
 import { environment } from '../../environments/environment';
 import { ToastController } from '@ionic/angular';
+import { ConnectivityService } from '../services/connectivity.service';
 
 
 @Component({
@@ -19,6 +20,7 @@ export class SentMessagesPage implements OnInit {
   objectKeys = Object.keys;
   defaultApiUrl = environment.apiUrl;
   loading = true;
+  networkStatus: boolean = true;
 
   constructor(
     private smsService: SmsService,
@@ -26,9 +28,26 @@ export class SentMessagesPage implements OnInit {
     private alertController: AlertController,
     private authService: AuthService,
     private toastCtrl: ToastController,
+    private connectivityService: ConnectivityService,
   ) { }
 
   async ngOnInit() {
+
+    this.networkStatus = await this.connectivityService.checkNetworkStatus();
+
+    // Listen for changes
+    this.connectivityService.startNetworkListener((isConnected) => {
+      this.networkStatus = isConnected;
+      if (isConnected) {
+        this.fetchSentMessages(); // retry when network returns
+      }
+    });
+
+  }
+
+  async fetchSentMessages()
+  {
+
     try {
       const messages = await this.smsService.getSentMessages();
       this.groupedMessages = this.smsService.groupMessagesByPhoneNumber(messages);

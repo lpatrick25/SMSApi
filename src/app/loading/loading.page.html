@@ -4,10 +4,19 @@
       <img src="assets/bfp.webp" alt="Logo" class="logo" />
     </div>
 
-    <div class="network-check-animation">
+    <div class="network-check-animation" *ngIf="!hasProceeded">
       <img src="assets/loading.gif" alt="Loading" />
     </div>
 
     <p class="loading-message">{{ loadingMessage }}</p>
+
+    <!-- <ion-button
+      expand="block"
+      color="primary"
+      (click)="checkConnection()"
+      *ngIf="!networkStatus && !hasProceeded"
+    >
+      Retry
+    </ion-button> -->
   </div>
 </ion-content>

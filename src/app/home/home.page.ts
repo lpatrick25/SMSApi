@@ -3,7 +3,6 @@ import { SmsService } from '../services/app.service';
 import { interval, Subscription } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 import { SMS } from '@awesome-cordova-plugins/sms/ngx';
-import { Platform } from '@ionic/angular';
 import { AndroidPermissions } from '@awesome-cordova-plugins/android-permissions/ngx';
 import { AlertController } from '@ionic/angular';
 import { environment } from '../../environments/environment';
@@ -13,6 +12,7 @@ import { AuthService } from '../services/auth.service';
 import { ModalController } from '@ionic/angular';
 import { SettingsModalComponent } from '../settings-modal/settings-modal.component';
 import { Router } from '@angular/router';
+import { ConnectivityService } from '../services/connectivity.service';
 
 @Component({
   selector: 'app-root',
@@ -26,16 +26,15 @@ export class HomePage implements OnInit, OnDestroy {
   private intervalSubscription!: Subscription;
   private isProcessing = false;
   defaultApiUrl = environment.apiUrl;
+  networkStatus: boolean = true;
 
   constructor(
     private smsService: SmsService,
-    private sms: SMS,
-    private platform: Platform,
     private androidPermissions: AndroidPermissions,
     private alertController: AlertController,
     private authService: AuthService,
     private modalCtrl: ModalController,
-    private router: Router,
+    private connectivityService: ConnectivityService,
   ) {
     if (Capacitor.isNativePlatform()) {
       this.initializeApp();
@@ -137,14 +136,31 @@ export class HomePage implements OnInit, OnDestroy {
     await alert.present();
   }
 
-  ngOnInit() {
+  async ngOnInit() {
     this.requestPermissions();
 
     if (!localStorage.getItem('customApiUrl')) {
       this.presentApiUrlDialog();
     }
 
-    // Start fetching data
+    this.networkStatus = await this.connectivityService.checkNetworkStatus();
+
+    // Listen for changes
+    this.connectivityService.startNetworkListener((isConnected) => {
+      this.networkStatus = isConnected;
+      if (isConnected) {
+        this.fetchPendingMessages(); // retry when network returns
+      }
+    });
+
+    this.fetchPendingMessages();
+  }
+
+  fetchPendingMessages() {
+    if (!this.networkStatus) return;
+
+    this.loading = true;
+
     this.intervalSubscription = interval(15000)
       .pipe(switchMap(() => this.smsService.getPendingSmsRequests()))
       .subscribe(async (data) => {
@@ -152,7 +168,7 @@ export class HomePage implements OnInit, OnDestroy {
         if (this.pendingSmsRequests.length > 0) {
           await this.processPendingSmsQueue();
         }
-        this.loading = false; // Data fetched, stop loading
+        this.loading = false;
       });
   }
 

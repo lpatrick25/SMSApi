@@ -69,3 +69,18 @@ ion-content {
     max-width: 150px; /* Adjust logo size for small screens */
   }
 }
+
+ion-button {
+  margin-top: 20px;
+  width: 70%;
+  max-width: 300px;
+  --border-radius: 8px;
+  --box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  font-weight: bold;
+}
+
+@media (max-width: 600px) {
+  ion-button {
+    width: 80%;
+  }
+}
