@@ -13,9 +13,8 @@ import { Subscription } from 'rxjs';
 
 export class AppComponent implements OnInit, OnDestroy {
   isLoggedIn = false;
-  networkStatus = true; // Assume online to start
+  networkStatus = true;
   private loginSub!: Subscription;
-  private networkSub!: Subscription;
 
   constructor(
     private router: Router,
@@ -35,13 +34,10 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   listenToNetworkChanges() {
-    // Subscribe to network changes from your ConnectivityService.
-    // Here, we assume your service's startNetworkListener accepts a callback.
     this.connectivityService.startNetworkListener((isConnected: boolean) => {
       this.networkStatus = isConnected;
-      // Optionally, you can also trigger a login check or UI update here
       if (isConnected) {
-        // For instance, re-check if user is still logged in or refresh the UI.
+        this.monitorLoginStatus();
       }
     });
   }

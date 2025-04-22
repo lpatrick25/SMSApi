@@ -27,7 +27,6 @@ export class LoginPage implements OnInit {
   ngOnInit() {
     this.checkConnection();
 
-    // Listen to network status changes
     this.connectivityService.startNetworkListener((isConnected) => {
       this.networkStatus = isConnected;
       console.log('Network status changed:', this.networkStatus);
@@ -45,7 +44,6 @@ export class LoginPage implements OnInit {
     });
   }
 
-  // Function to check initial network status
   async checkConnection() {
     this.networkStatus = await this.connectivityService.checkNetworkStatus();
     console.log('Initial network status:', this.networkStatus);
@@ -85,8 +83,12 @@ export class LoginPage implements OnInit {
       next: async (res) => {
         this.loading = false;
         if (res?.token) {
-          await this.authService.setToken(res.token);  // Ensure token is set before navigation
-          this.navCtrl.navigateRoot('/home');
+          if (res.user.role == 'Admin' || res.user.role == 'Marshall') {
+            await this.authService.setToken(res.token);
+            this.navCtrl.navigateRoot('/home');
+          } else {
+            await this.showToast('Not Authorized');
+          }
         } else {
           await this.showToast('Invalid response. No token received.');
         }
@@ -99,7 +101,6 @@ export class LoginPage implements OnInit {
     });
   }
 
-  // Function to show a toast message
   private async showToast(message: string) {
     const toast = await this.toastCtrl.create({
       message,
