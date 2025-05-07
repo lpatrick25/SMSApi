@@ -25,13 +25,6 @@ const routes: Routes = [
     redirectTo: 'loading',
     pathMatch: 'full'
   },
-  {
-    path: 'sent-messages',
-    loadChildren: () => import('./sent-messages/sent-messages.module').then(m => m.SentMessagesPageModule)
-  },
-
-
-
 ];
 
 @NgModule({

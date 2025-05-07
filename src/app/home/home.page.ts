@@ -9,6 +9,7 @@ import { AuthService } from '../services/auth.service';
 import { ModalController } from '@ionic/angular';
 import { SettingsModalComponent } from '../settings-modal/settings-modal.component';
 import { ConnectivityService } from '../services/connectivity.service';
+import { ApiUrlModalComponent } from '../api-url-modal/api-url-modal.component';
 
 @Component({
   selector: 'app-root',
@@ -32,7 +33,7 @@ export class HomePage implements OnInit, OnDestroy {
     private authService: AuthService,
     private modalCtrl: ModalController,
     private connectivityService: ConnectivityService
-  ) {}
+  ) { }
 
   async checkConnection() {
     this.networkStatus = await this.connectivityService.checkNetworkStatus();
@@ -154,34 +155,26 @@ export class HomePage implements OnInit, OnDestroy {
 
   async presentApiUrlDialog() {
     const storedUrl = localStorage.getItem('customApiUrl') || '';
-    const alert = await this.alertController.create({
-      header: 'Set API URL',
-      inputs: [
-        {
-          name: 'apiUrl',
-          type: 'text',
-          placeholder: 'Leave blank to use default',
-          value: storedUrl || this.defaultApiUrl,
-        },
-      ],
-      buttons: [
-        { text: 'Cancel', role: 'cancel' },
-        {
-          text: 'Save',
-          handler: (data) => {
-            if (data.apiUrl?.trim()) {
-              localStorage.setItem('customApiUrl', data.apiUrl.trim());
-              this.showToast('API URL updated successfully.', 'success');
-            } else {
-              localStorage.removeItem('customApiUrl');
-              this.showToast('Using default API URL.', 'success');
-            }
-          },
-        },
-      ],
+    const modal = await this.modalCtrl.create({
+      component: ApiUrlModalComponent,
+      cssClass: 'api-url-modal',
+      componentProps: {
+        apiUrl: storedUrl || this.defaultApiUrl,
+      },
     });
 
-    await alert.present();
+    modal.onDidDismiss().then((result) => {
+      const data = result.data;
+      if (data?.apiUrl?.trim()) {
+        localStorage.setItem('customApiUrl', data.apiUrl.trim());
+        this.showToast('API URL updated successfully.', 'success');
+      } else {
+        localStorage.removeItem('customApiUrl');
+        this.showToast('Using default API URL.', 'success');
+      }
+    });
+
+    await modal.present();
   }
 
   async showPermissionAlert() {
