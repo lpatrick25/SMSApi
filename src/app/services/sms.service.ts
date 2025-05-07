@@ -22,7 +22,7 @@ export class SmsService {
     private http: HttpClient,
     private snackBar: MatSnackBar,
     private authService: AuthService
-  ) {}
+  ) { }
 
   private defaultApiUrl = environment.apiUrl;
 
@@ -192,6 +192,24 @@ export class SmsService {
   async isMessageSent(id: number): Promise<boolean> {
     const sentMessages = await this.getSentMessages();
     return sentMessages.some((msg) => msg.id === id && msg.status === 'sent');
+  }
+
+  async deleteSentMessage(id: number): Promise<void> {
+    const sentMessages = await this.getSentMessages();
+    const updatedMessages = sentMessages.filter((msg) => msg.id !== id);
+    await Storage.set({
+      key: 'sentMessages',
+      value: JSON.stringify(updatedMessages),
+    });
+  }
+
+  async deleteSentMessagesByPhoneNumber(phoneNumber: string): Promise<void> {
+    const sentMessages = await this.getSentMessages();
+    const updatedMessages = sentMessages.filter((msg) => msg.phoneNumber !== phoneNumber);
+    await Storage.set({
+      key: 'sentMessages',
+      value: JSON.stringify(updatedMessages),
+    });
   }
 
   async loadSentMessages() {

@@ -7,6 +7,7 @@ import { IonicModule } from '@ionic/angular';
 import { SentMessagesPageRoutingModule } from './sent-messages-routing.module';
 
 import { SentMessagesPage } from './sent-messages.page';
+import { TruncatePipe } from '../pipes/truncate.pipe';
 
 @NgModule({
   imports: [
@@ -15,6 +16,6 @@ import { SentMessagesPage } from './sent-messages.page';
     IonicModule,
     SentMessagesPageRoutingModule
   ],
-  declarations: [SentMessagesPage]
+  declarations: [SentMessagesPage, TruncatePipe]
 })
 export class SentMessagesPageModule {}

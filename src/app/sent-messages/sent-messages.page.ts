@@ -6,16 +6,6 @@ import { SettingsModalComponent } from '../settings-modal/settings-modal.compone
 import { environment } from '../../environments/environment';
 import { ConnectivityService } from '../services/connectivity.service';
 
-@Pipe({
-  name: 'truncate',
-})
-export class TruncatePipe implements PipeTransform {
-  transform(value: string, limit: number): string {
-    if (!value) return '';
-    return value.length > limit ? value.substring(0, limit) + '...' : value;
-  }
-}
-
 @Component({
   selector: 'app-sent-messages',
   templateUrl: './sent-messages.page.html',
@@ -92,6 +82,69 @@ export class SentMessagesPage implements OnInit {
 
   goBack() {
     this.selectedPhoneNumber = null;
+  }
+
+  async confirmDeleteMessage(messageId: number) {
+    const alert = await this.alertController.create({
+      header: 'Delete Message',
+      message: 'Are you sure you want to delete this message?',
+      buttons: [
+        { text: 'Cancel', role: 'cancel' },
+        {
+          text: 'Delete',
+          role: 'destructive',
+          handler: () => this.deleteMessage(messageId),
+        },
+      ],
+    });
+
+    await alert.present();
+  }
+
+  async deleteMessage(messageId: number) {
+    try {
+      if (!this.selectedPhoneNumber) throw new Error('No phone number selected');
+      await this.smsService.deleteSentMessage(messageId);
+      this.groupedMessages[this.selectedPhoneNumber] = this.groupedMessages[
+        this.selectedPhoneNumber
+      ].filter((msg) => msg.id !== messageId);
+      if (this.groupedMessages[this.selectedPhoneNumber].length === 0) {
+        delete this.groupedMessages[this.selectedPhoneNumber];
+        this.selectedPhoneNumber = null;
+      }
+      this.showToast('Message deleted successfully.', 'success');
+    } catch (err) {
+      console.error('Failed to delete message:', err);
+      this.showToast('Failed to delete message.', 'danger');
+    }
+  }
+
+  async confirmDeleteGroup(phoneNumber: string) {
+    const alert = await this.alertController.create({
+      header: 'Delete Conversation',
+      message: `Are you sure you want to delete all messages for ${phoneNumber}?`,
+      buttons: [
+        { text: 'Cancel', role: 'cancel' },
+        {
+          text: 'Delete',
+          role: 'destructive',
+          handler: () => this.deleteGroup(phoneNumber),
+        },
+      ],
+    });
+
+    await alert.present();
+  }
+
+  async deleteGroup(phoneNumber: string) {
+    try {
+      await this.smsService.deleteSentMessagesByPhoneNumber(phoneNumber);
+      delete this.groupedMessages[phoneNumber];
+      this.showToast('Conversation deleted successfully.', 'success');
+    } catch (err) {
+      console.error('Failed to delete conversation:', err);
+      this.showToast('Failed to delete conversation.', 'danger');
+    }
   }
 
   async presentSettingsModal() {

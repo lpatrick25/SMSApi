@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { NavController, ToastController } from '@ionic/angular';
+import { AlertController, NavController, ToastController } from '@ionic/angular';
 import { ConnectivityService } from '../services/connectivity.service';
 import { AuthService } from '../services/auth.service';
 
@@ -21,7 +21,8 @@ export class LoginPage implements OnInit {
     private navCtrl: NavController,
     private toastCtrl: ToastController,
     private connectivityService: ConnectivityService,
-    private authService: AuthService
+    private authService: AuthService,
+        private alertController: AlertController,
   ) {}
 
   ngOnInit() {
@@ -89,6 +90,35 @@ export class LoginPage implements OnInit {
           this.showToast('Login failed. Please check your credentials.', 'danger');
         },
       });
+  }
+
+  async forgotPassword() {
+    const alert = await this.alertController.create({
+      header: 'Forgot Password',
+      message: 'Enter your email to receive a password reset link.',
+      inputs: [
+        {
+          name: 'email',
+          type: 'email',
+          placeholder: 'Your email address',
+        },
+      ],
+      buttons: [
+        { text: 'Cancel', role: 'cancel' },
+        {
+          text: 'Send',
+          handler: async (data) => {
+            if (data.email) {
+              // Implement API call to send reset link
+              this.showToast('Password reset link sent.', 'success');
+            } else {
+              this.showToast('Please enter an email address.', 'warning');
+            }
+          },
+        },
+      ],
+    });
+    await alert.present();
   }
 
   private async showToast(message: string, color: string = 'primary') {

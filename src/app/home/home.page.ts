@@ -5,8 +5,6 @@ import { switchMap } from 'rxjs/operators';
 import { AndroidPermissions } from '@awesome-cordova-plugins/android-permissions/ngx';
 import { AlertController, ToastController } from '@ionic/angular';
 import { environment } from '../../environments/environment';
-import { StatusBar } from '@capacitor/status-bar';
-import { Capacitor } from '@capacitor/core';
 import { AuthService } from '../services/auth.service';
 import { ModalController } from '@ionic/angular';
 import { SettingsModalComponent } from '../settings-modal/settings-modal.component';
@@ -34,20 +32,7 @@ export class HomePage implements OnInit, OnDestroy {
     private authService: AuthService,
     private modalCtrl: ModalController,
     private connectivityService: ConnectivityService
-  ) {
-    if (Capacitor.isNativePlatform()) {
-      this.initializeApp();
-    }
-  }
-
-  async initializeApp() {
-    try {
-      await StatusBar.setOverlaysWebView({ overlay: false });
-      await StatusBar.setBackgroundColor({ color: '#1E3A8A' });
-    } catch (error) {
-      console.error('StatusBar error:', error);
-    }
-  }
+  ) {}
 
   async checkConnection() {
     this.networkStatus = await this.connectivityService.checkNetworkStatus();
