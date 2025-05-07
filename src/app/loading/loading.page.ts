@@ -3,7 +3,7 @@ import { ToastController } from '@ionic/angular';
 import { ConnectivityService } from '../services/connectivity.service';
 import { Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
-import { Subscription } from 'rxjs';
+import type { PluginListenerHandle } from '@capacitor/core';
 
 @Component({
   selector: 'app-loading',
@@ -14,7 +14,7 @@ import { Subscription } from 'rxjs';
 export class LoadingPage implements OnInit, OnDestroy {
   networkStatus: boolean = false;
   loadingMessage: string = 'Checking network connectivity...';
-  private networkSubscription: Subscription | undefined;
+  private networkSubscription?: PluginListenerHandle;
   public hasProceeded: boolean = false;
 
   constructor(
@@ -27,17 +27,18 @@ export class LoadingPage implements OnInit, OnDestroy {
   ngOnInit() {
     this.checkConnection();
 
-    // Start listening to network changes
     this.connectivityService.startNetworkListener((status) => {
       this.networkStatus = status;
       if (status && !this.hasProceeded) {
-        this.checkConnection(); // Retry connection when network comes back
+        this.checkConnection();
       }
+    }).then(listener => {
+      this.networkSubscription = listener;
     });
   }
 
   ngOnDestroy() {
-    // Optional cleanup if you later make startNetworkListener return a subscription
+    this.networkSubscription?.remove();
   }
 
   async checkConnection() {
@@ -52,11 +53,11 @@ export class LoadingPage implements OnInit, OnDestroy {
         this.hasProceeded = true;
         this.router.navigate([isLoggedIn ? '/home' : '/login']);
       } else {
-        this.showToast('Cannot reach the server. Please ensure it is running.', 'danger');
+        this.showToast('Cannot reach the server.', 'danger');
       }
     } else {
-      this.loadingMessage = 'No internet connection. Please check your network.';
-      this.showToast('You are offline. Please check your internet connection.', 'danger');
+      this.loadingMessage = 'No internet connection.';
+      this.showToast('You are offline.', 'danger');
     }
   }
 
@@ -66,6 +67,6 @@ export class LoadingPage implements OnInit, OnDestroy {
       duration: 3000,
       color,
     });
-    toast.present();
+    await toast.present();
   }
 }

@@ -22,91 +22,81 @@ export class LoginPage implements OnInit {
     private toastCtrl: ToastController,
     private connectivityService: ConnectivityService,
     private authService: AuthService
-  ) { }
+  ) {}
 
   ngOnInit() {
     this.checkConnection();
 
     this.connectivityService.startNetworkListener((isConnected) => {
       this.networkStatus = isConnected;
-      console.log('Network status changed:', this.networkStatus);
     });
 
     this.authService.isLoggedIn().then((isLoggedIn) => {
       if (isLoggedIn) {
         this.navCtrl.navigateRoot('/home');
-      } else {
-        this.checkConnection();
-        this.connectivityService.startNetworkListener((isConnected) => {
-          this.networkStatus = isConnected;
-        });
       }
     });
   }
 
   async checkConnection() {
     this.networkStatus = await this.connectivityService.checkNetworkStatus();
-    console.log('Initial network status:', this.networkStatus);
   }
 
   async login() {
     if (!this.networkStatus) {
-      const toast = await this.toastCtrl.create({
-        message: 'No internet connection. Please check your network.',
-        duration: 3000,
-        color: 'warning',
-      });
-      toast.present();
+      this.showToast('No internet connection.', 'warning');
       return;
     }
 
     if (!this.email || !this.password) {
-      const toast = await this.toastCtrl.create({
-        message: 'Please enter both email and password.',
-        duration: 3000,
-        color: 'warning',
-      });
-      toast.present();
+      this.showToast('Please enter email and password.', 'warning');
       return;
     }
 
     this.loading = true;
 
     const headers = new HttpHeaders({
-      'Accept': 'application/json',
+      Accept: 'application/json',
     });
 
-    this.http.post<any>('https://bfp.unitech.host/api/login', {
-      email: this.email,
-      password: this.password,
-    }, { headers }).subscribe({
-      next: async (res) => {
-        this.loading = false;
-        if (res?.token) {
-          if (res.user.role == 'Admin' || res.user.role == 'Marshall') {
-            await this.authService.setToken(res.token);
-            this.navCtrl.navigateRoot('/home');
+    this.http
+      .post<any>(
+        'https://bfp.unitech.host/api/login',
+        {
+          email: this.email,
+          password: this.password,
+        },
+        { headers }
+      )
+      .subscribe({
+        next: async (res) => {
+          this.loading = false;
+          if (res?.token) {
+            if (res.user.role === 'Admin' || res.user.role === 'Marshall') {
+              await this.authService.setToken(res.token);
+              this.navCtrl.navigateRoot('/home');
+              this.showToast('Login successful.', 'success');
+            } else {
+              this.showToast('Not authorized.', 'danger');
+            }
           } else {
-            await this.showToast('Not Authorized');
+            this.showToast('Invalid response.', 'danger');
           }
-        } else {
-          await this.showToast('Invalid response. No token received.');
-        }
-      },
-      error: async (err) => {
-        this.loading = false;
-        console.error('Login Error:', err);
-        await this.showToast('Login failed. Please check your credentials.');
-      }
-    });
+        },
+        error: async (err) => {
+          this.loading = false;
+          console.error('Login Error:', err);
+          this.showToast('Login failed. Please check your credentials.', 'danger');
+        },
+      });
   }
 
-  private async showToast(message: string) {
+  private async showToast(message: string, color: string = 'primary') {
     const toast = await this.toastCtrl.create({
       message,
       duration: 3000,
-      color: 'danger',
+      color,
     });
-    toast.present();
+    await toast.present();
   }
 }

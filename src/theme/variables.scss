@@ -1,2 +1,91 @@
-// For information on how to create your own theme, please see:
-// http://ionicframework.com/docs/theming/
+/* Success Snackbar */
+.snackbar-success {
+  background-color: #10B981;
+  color: #FFFFFF !important;
+  font-weight: 500;
+  padding: 12px 24px;
+  border-radius: 8px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: all 0.3s ease;
+}
+
+/* Error Snackbar */
+.snackbar-error {
+  background-color: #EF4444;
+  color: #FFFFFF !important;
+  font-weight: 500;
+  padding: 12px 24px;
+  border-radius: 8px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: all 0.3s ease;
+}
+
+/* Warning Snackbar */
+.snackbar-warning {
+  background-color: #FFD700;
+  color: #1F2937 !important;
+  font-weight: 500;
+  padding: 12px 24px;
+  border-radius: 8px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: all 0.3s ease;
+}
+
+/* Custom Close Button */
+.snackbar-success .mat-simple-snackbar-action,
+.snackbar-error .mat-simple-snackbar-action,
+.snackbar-warning .mat-simple-snackbar-action {
+  color: #FFFFFF;
+  font-weight: 600;
+  text-transform: uppercase;
+  transition: color 0.3s ease;
+}
+
+.snackbar-warning .mat-simple-snackbar-action {
+  color: #1F2937;
+}
+
+/* Hover effect on Close Button */
+.snackbar-success .mat-simple-snackbar-action:hover,
+.snackbar-error .mat-simple-snackbar-action:hover,
+.snackbar-warning .mat-simple-snackbar-action:hover {
+  color: #E5E7EB;
+}
+
+.snackbar-warning .mat-simple-snackbar-action:hover {
+  color: #374151;
+}
+
+/* Smooth Fade Animation */
+.mat-simple-snackbar {
+  opacity: 0;
+  animation: fadeInOut 3s forwards;
+}
+
+@keyframes fadeInOut {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  20% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  80% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+}

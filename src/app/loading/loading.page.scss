@@ -1,13 +1,11 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
 ion-app {
-  background-color: #f0f0f0; /* Fallback color */
-  background-image: url('/assets/background.webp'); /* Correct relative path */
-  background-size: cover; /* Make sure the image covers the screen */
-  background-position: center; /* Center the image */
-  background-repeat: no-repeat; /* Prevent repeating the image */
-  height: 100vh; /* Ensure the background covers the full height */
-  display: flex; /* Use flex to center the content */
-  justify-content: center; /* Center content horizontally */
-  align-items: center; /* Center content vertically */
+  background: linear-gradient(135deg, #800000, #FFD700);
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .center-wrapper {
@@ -20,67 +18,67 @@ ion-app {
 }
 
 ion-content {
-  --background: transparent; /* So background from ion-app is visible */
+  --background: transparent;
+  background-image: url('/assets/background.webp');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
   display: flex;
   justify-content: center;
   align-items: center;
   flex-direction: column;
   height: 100%;
   width: 100%;
-  z-index: 1;
   text-align: center;
-  position: relative;
 }
 
 .logo-container {
-  margin-bottom: 20px; /* Space between logo and spinner */
+  margin-bottom: 30px;
+  animation: fadeIn 1s ease-in;
 }
 
 .logo {
-  max-width: 200px; /* Adjust logo size */
+  max-width: 180px;
+  transition: transform 0.3s ease;
 }
 
-.loading-spinner {
-  margin-bottom: 20px; /* Space between spinner and loading message */
+.logo:hover {
+  transform: scale(1.05);
 }
 
 .loading-message {
-  font-size: 18px;
-  font-weight: bolder;
+  font-size: 1.2rem;
+  font-weight: 600;
   color: #ffffff;
-  margin-top: 10px;
+  text-shadow: #FFD700;
+  margin-top: 20px;
+  font-family: 'Inter', sans-serif;
+  animation: fadeIn 1.5s ease-in;
 }
 
-.network-check-animation img {
-  max-width: 200px;
-  margin-top: 20px;
+.network-check-animation ion-spinner {
+  --color: #FFD700;
+  width: 50px;
+  height: 50px;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @media (max-width: 600px) {
   .loading-message {
-    font-size: 16px;
-  }
-
-  .network-check-animation img {
-    max-width: 150px;
+    font-size: 1rem;
   }
 
   .logo {
-    max-width: 150px; /* Adjust logo size for small screens */
-  }
-}
-
-ion-button {
-  margin-top: 20px;
-  width: 70%;
-  max-width: 300px;
-  --border-radius: 8px;
-  --box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-  font-weight: bold;
-}
-
-@media (max-width: 600px) {
-  ion-button {
-    width: 80%;
+    max-width: 140px;
   }
 }
