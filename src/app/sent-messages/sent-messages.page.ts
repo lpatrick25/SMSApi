@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { SmsService } from '../services/app.service';
+import { SmsService } from '../services/sms.service';
 import { AlertController, ModalController } from '@ionic/angular';
 import { AuthService } from '../services/auth.service';
 import { SettingsModalComponent } from '../settings-modal/settings-modal.component';

@@ -14,6 +14,7 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import { AuthInterceptor } from './interceptors/auth.interceptor';
 import { SettingsModalComponent } from './settings-modal/settings-modal.component';
+import { Diagnostic } from '@awesome-cordova-plugins/diagnostic/ngx';
 
 @NgModule({
   declarations: [AppComponent, SettingsModalComponent],
@@ -22,6 +23,7 @@ import { SettingsModalComponent } from './settings-modal/settings-modal.componen
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
     AndroidPermissions,
     SMS,
+    Diagnostic,
     {
       provide: HTTP_INTERCEPTORS,
       useClass: AuthInterceptor,

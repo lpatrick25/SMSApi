@@ -1,8 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { SmsService } from '../services/app.service';
+import { SmsService } from '../services/sms.service';
 import { interval, Subscription } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
-import { SMS } from '@awesome-cordova-plugins/sms/ngx';
 import { AndroidPermissions } from '@awesome-cordova-plugins/android-permissions/ngx';
 import { AlertController } from '@ionic/angular';
 import { environment } from '../../environments/environment';
@@ -11,7 +10,6 @@ import { Capacitor } from '@capacitor/core';
 import { AuthService } from '../services/auth.service';
 import { ModalController } from '@ionic/angular';
 import { SettingsModalComponent } from '../settings-modal/settings-modal.component';
-import { Router } from '@angular/router';
 import { ConnectivityService } from '../services/connectivity.service';
 
 @Component({
@@ -22,7 +20,7 @@ import { ConnectivityService } from '../services/connectivity.service';
 })
 export class HomePage implements OnInit, OnDestroy {
   pendingSmsRequests: any[] = [];
-  loading = true;
+  loading = false;
   private intervalSubscription!: Subscription;
   private isProcessing = false;
   defaultApiUrl = environment.apiUrl;
@@ -34,7 +32,7 @@ export class HomePage implements OnInit, OnDestroy {
     private alertController: AlertController,
     private authService: AuthService,
     private modalCtrl: ModalController,
-    private connectivityService: ConnectivityService,
+    private connectivityService: ConnectivityService
   ) {
     if (Capacitor.isNativePlatform()) {
       this.initializeApp();
@@ -43,8 +41,8 @@ export class HomePage implements OnInit, OnDestroy {
 
   async initializeApp() {
     try {
-      await StatusBar.setOverlaysWebView({ overlay: false }); // This ensures the content goes below the status bar
-      await StatusBar.setBackgroundColor({ color: '#3880ff' }); // Match toolbar color (optional)
+      await StatusBar.setOverlaysWebView({ overlay: false });
+      await StatusBar.setBackgroundColor({ color: '#3880ff' });
     } catch (error) {
       console.error('StatusBar error:', error);
     }
@@ -54,13 +52,13 @@ export class HomePage implements OnInit, OnDestroy {
     const permissions = [
       this.androidPermissions.PERMISSION.SEND_SMS,
       this.androidPermissions.PERMISSION.READ_SMS,
-      this.androidPermissions.PERMISSION.RECEIVE_SMS
+      this.androidPermissions.PERMISSION.RECEIVE_SMS,
     ];
 
-    permissions.forEach(permission => {
-      this.androidPermissions.checkPermission(permission).then(result => {
+    permissions.forEach((permission) => {
+      this.androidPermissions.checkPermission(permission).then((result) => {
         if (!result.hasPermission) {
-          this.androidPermissions.requestPermission(permission).then(requestResult => {
+          this.androidPermissions.requestPermission(permission).then((requestResult) => {
             if (!requestResult.hasPermission) {
               this.showPermissionAlert();
             }
@@ -70,13 +68,76 @@ export class HomePage implements OnInit, OnDestroy {
     });
   }
 
+  async ngOnInit() {
+    this.requestPermissions();
+
+    if (!localStorage.getItem('customApiUrl')) {
+      this.presentApiUrlDialog();
+    }
+
+    this.networkStatus = await this.connectivityService.checkNetworkStatus();
+
+    this.connectivityService.startNetworkListener((isConnected) => {
+      this.networkStatus = isConnected;
+      if (isConnected && !this.intervalSubscription) {
+        this.startFetchingPendingMessages();
+      } else if (!isConnected && this.intervalSubscription) {
+        this.stopFetchingPendingMessages();
+      }
+    });
+
+    if (this.networkStatus) {
+      this.startFetchingPendingMessages();
+    }
+  }
+
+  startFetchingPendingMessages() {
+    if (this.intervalSubscription) return; // Prevent multiple subscriptions
+
+    this.loading = true;
+    this.intervalSubscription = interval(15000)
+      .pipe(switchMap(() => this.smsService.getPendingSmsRequests()))
+      .subscribe(async (data) => {
+        this.pendingSmsRequests = data.filter((sms) => sms.status === 'pending');
+        this.loading = false;
+
+        if (this.pendingSmsRequests.length > 0 && !this.isProcessing) {
+          await this.processPendingSmsQueue();
+        }
+      });
+  }
+
+  stopFetchingPendingMessages() {
+    if (this.intervalSubscription) {
+      this.intervalSubscription.unsubscribe();
+      this.intervalSubscription = null!;
+    }
+  }
+
+  async processPendingSmsQueue() {
+    if (this.isProcessing) return;
+    this.isProcessing = true;
+
+    try {
+      await this.smsService.processPendingSmsQueue();
+    } catch (error) {
+      console.error('Error processing SMS queue:', error);
+    } finally {
+      this.isProcessing = false;
+    }
+  }
+
+  ngOnDestroy() {
+    this.stopFetchingPendingMessages();
+  }
+
   async presentSettingsModal() {
     const modal = await this.modalCtrl.create({
       component: SettingsModalComponent,
-      cssClass: 'settings-modal'
+      cssClass: 'settings-modal',
     });
 
-    modal.onDidDismiss().then(result => {
+    modal.onDidDismiss().then((result) => {
       const action = result.data?.action;
       if (action === 'setApiUrl') {
         this.presentApiUrlDialog();
@@ -90,7 +151,6 @@ export class HomePage implements OnInit, OnDestroy {
 
   async presentApiUrlDialog() {
     const storedUrl = localStorage.getItem('customApiUrl') || '';
-
     const alert = await this.alertController.create({
       header: 'Set API URL',
       inputs: [
@@ -98,8 +158,8 @@ export class HomePage implements OnInit, OnDestroy {
           name: 'apiUrl',
           type: 'text',
           placeholder: 'Leave blank to use default',
-          value: storedUrl || this.defaultApiUrl
-        }
+          value: storedUrl || this.defaultApiUrl,
+        },
       ],
       buttons: [
         { text: 'Cancel', role: 'cancel' },
@@ -113,9 +173,9 @@ export class HomePage implements OnInit, OnDestroy {
               localStorage.removeItem('customApiUrl');
               console.log('Custom API URL cleared, using default.');
             }
-          }
-        }
-      ]
+          },
+        },
+      ],
     });
 
     await alert.present();
@@ -130,62 +190,9 @@ export class HomePage implements OnInit, OnDestroy {
     const alert = await this.alertController.create({
       header: 'Permission Needed',
       message: 'Please enable permissions manually in device settings under Apps > YourApp > Permissions.',
-      buttons: ['OK']
+      buttons: ['OK'],
     });
 
     await alert.present();
-  }
-
-  async ngOnInit() {
-    this.requestPermissions();
-
-    if (!localStorage.getItem('customApiUrl')) {
-      this.presentApiUrlDialog();
-    }
-
-    this.networkStatus = await this.connectivityService.checkNetworkStatus();
-
-    // Listen for changes
-    this.connectivityService.startNetworkListener((isConnected) => {
-      this.networkStatus = isConnected;
-      if (isConnected) {
-        this.fetchPendingMessages(); // retry when network returns
-      }
-    });
-
-    this.fetchPendingMessages();
-  }
-
-  fetchPendingMessages() {
-    if (!this.networkStatus) return;
-
-    this.loading = true;
-
-    this.intervalSubscription = interval(15000)
-      .pipe(switchMap(() => this.smsService.getPendingSmsRequests()))
-      .subscribe(async (data) => {
-        this.pendingSmsRequests = data.filter(sms => sms.status === 'pending');
-        if (this.pendingSmsRequests.length > 0) {
-          await this.processPendingSmsQueue();
-        }
-        this.loading = false;
-      });
-  }
-
-  ngOnDestroy() {
-    if (this.intervalSubscription) {
-      this.intervalSubscription.unsubscribe();
-    }
-  }
-
-  async processPendingSmsQueue() {
-    if (this.isProcessing) return;
-    this.isProcessing = true;
-
-    try {
-      await this.smsService.processPendingSmsQueue();
-    } finally {
-      this.isProcessing = false;
-    }
   }
 }
