@@ -3,7 +3,7 @@ import { SmsService } from '../services/sms.service';
 import { interval, Subscription } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 import { AndroidPermissions } from '@awesome-cordova-plugins/android-permissions/ngx';
-import { AlertController } from '@ionic/angular';
+import { AlertController, ToastController } from '@ionic/angular';
 import { environment } from '../../environments/environment';
 import { StatusBar } from '@capacitor/status-bar';
 import { Capacitor } from '@capacitor/core';
@@ -21,15 +21,16 @@ import { ConnectivityService } from '../services/connectivity.service';
 export class HomePage implements OnInit, OnDestroy {
   pendingSmsRequests: any[] = [];
   loading = false;
-  private intervalSubscription!: Subscription;
+  networkStatus: boolean = true;
+  private intervalSubscription?: Subscription;
   private isProcessing = false;
   defaultApiUrl = environment.apiUrl;
-  networkStatus: boolean = true;
 
   constructor(
     private smsService: SmsService,
     private androidPermissions: AndroidPermissions,
     private alertController: AlertController,
+    private toastCtrl: ToastController,
     private authService: AuthService,
     private modalCtrl: ModalController,
     private connectivityService: ConnectivityService
@@ -42,9 +43,18 @@ export class HomePage implements OnInit, OnDestroy {
   async initializeApp() {
     try {
       await StatusBar.setOverlaysWebView({ overlay: false });
-      await StatusBar.setBackgroundColor({ color: '#3880ff' });
+      await StatusBar.setBackgroundColor({ color: '#1E3A8A' });
     } catch (error) {
       console.error('StatusBar error:', error);
+    }
+  }
+
+  async checkConnection() {
+    this.networkStatus = await this.connectivityService.checkNetworkStatus();
+    if (this.networkStatus) {
+      this.startFetchingPendingMessages();
+    } else {
+      this.showToast('No internet connection. Please try again.', 'danger');
     }
   }
 
@@ -92,25 +102,32 @@ export class HomePage implements OnInit, OnDestroy {
   }
 
   startFetchingPendingMessages() {
-    if (this.intervalSubscription) return; // Prevent multiple subscriptions
+    if (this.intervalSubscription) return;
 
     this.loading = true;
     this.intervalSubscription = interval(15000)
       .pipe(switchMap(() => this.smsService.getPendingSmsRequests()))
-      .subscribe(async (data) => {
-        this.pendingSmsRequests = data.filter((sms) => sms.status === 'pending');
-        this.loading = false;
+      .subscribe({
+        next: async (data) => {
+          this.pendingSmsRequests = data.filter((sms) => sms.status === 'pending');
+          this.loading = false;
 
-        if (this.pendingSmsRequests.length > 0 && !this.isProcessing) {
-          await this.processPendingSmsQueue();
-        }
+          if (this.pendingSmsRequests.length > 0 && !this.isProcessing) {
+            await this.processPendingSmsQueue();
+          }
+        },
+        error: (err) => {
+          this.loading = false;
+          this.showToast('Failed to fetch messages.', 'danger');
+          console.error('Fetch error:', err);
+        },
       });
   }
 
   stopFetchingPendingMessages() {
     if (this.intervalSubscription) {
       this.intervalSubscription.unsubscribe();
-      this.intervalSubscription = null!;
+      this.intervalSubscription = undefined;
     }
   }
 
@@ -122,6 +139,7 @@ export class HomePage implements OnInit, OnDestroy {
       await this.smsService.processPendingSmsQueue();
     } catch (error) {
       console.error('Error processing SMS queue:', error);
+      this.showToast('Error processing messages.', 'danger');
     } finally {
       this.isProcessing = false;
     }
@@ -168,10 +186,10 @@ export class HomePage implements OnInit, OnDestroy {
           handler: (data) => {
             if (data.apiUrl?.trim()) {
               localStorage.setItem('customApiUrl', data.apiUrl.trim());
-              console.log('Custom API URL saved:', data.apiUrl);
+              this.showToast('API URL updated successfully.', 'success');
             } else {
               localStorage.removeItem('customApiUrl');
-              console.log('Custom API URL cleared, using default.');
+              this.showToast('Using default API URL.', 'success');
             }
           },
         },
@@ -181,18 +199,22 @@ export class HomePage implements OnInit, OnDestroy {
     await alert.present();
   }
 
-  getApiUrl(): string {
-    const storedUrl = localStorage.getItem('customApiUrl');
-    return storedUrl && storedUrl.trim() !== '' ? storedUrl : environment.apiUrl;
-  }
-
   async showPermissionAlert() {
     const alert = await this.alertController.create({
-      header: 'Permission Needed',
-      message: 'Please enable permissions manually in device settings under Apps > YourApp > Permissions.',
+      header: 'Permission Required',
+      message: 'Please enable SMS permissions in your device settings.',
       buttons: ['OK'],
     });
 
     await alert.present();
+  }
+
+  private async showToast(message: string, color: string = 'primary') {
+    const toast = await this.toastCtrl.create({
+      message,
+      duration: 3000,
+      color,
+    });
+    await toast.present();
   }
 }

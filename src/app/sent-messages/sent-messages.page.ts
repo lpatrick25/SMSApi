@@ -1,12 +1,20 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Pipe, PipeTransform } from '@angular/core';
 import { SmsService } from '../services/sms.service';
-import { AlertController, ModalController } from '@ionic/angular';
+import { AlertController, ModalController, ToastController } from '@ionic/angular';
 import { AuthService } from '../services/auth.service';
 import { SettingsModalComponent } from '../settings-modal/settings-modal.component';
 import { environment } from '../../environments/environment';
-import { ToastController } from '@ionic/angular';
 import { ConnectivityService } from '../services/connectivity.service';
 
+@Pipe({
+  name: 'truncate',
+})
+export class TruncatePipe implements PipeTransform {
+  transform(value: string, limit: number): string {
+    if (!value) return '';
+    return value.length > limit ? value.substring(0, limit) + '...' : value;
+  }
+}
 
 @Component({
   selector: 'app-sent-messages',
@@ -28,40 +36,54 @@ export class SentMessagesPage implements OnInit {
     private alertController: AlertController,
     private authService: AuthService,
     private toastCtrl: ToastController,
-    private connectivityService: ConnectivityService,
-  ) { }
+    private connectivityService: ConnectivityService
+  ) {}
 
   async ngOnInit() {
-
     this.networkStatus = await this.connectivityService.checkNetworkStatus();
 
-    // Listen for changes
     this.connectivityService.startNetworkListener((isConnected) => {
       this.networkStatus = isConnected;
       if (isConnected) {
-        this.fetchSentMessages(); // retry when network returns
+        this.fetchSentMessages();
       }
     });
 
+    if (this.networkStatus) {
+      this.fetchSentMessages();
+    }
   }
 
-  async fetchSentMessages()
-  {
+  async checkConnection() {
+    this.networkStatus = await this.connectivityService.checkNetworkStatus();
+    if (this.networkStatus) {
+      this.fetchSentMessages();
+    } else {
+      this.showToast('No internet connection. Please try again.', 'danger');
+    }
+  }
 
+  async fetchSentMessages() {
     try {
       const messages = await this.smsService.getSentMessages();
       this.groupedMessages = this.smsService.groupMessagesByPhoneNumber(messages);
     } catch (err) {
       console.error('Failed to load messages:', err);
+      this.showToast('Failed to load messages.', 'danger');
     } finally {
       this.loading = false;
     }
   }
 
   async refreshMessages(event: any) {
-    const messages = await this.smsService.getSentMessages();
-    this.groupedMessages = this.smsService.groupMessagesByPhoneNumber(messages);
-    event.target.complete();
+    try {
+      const messages = await this.smsService.getSentMessages();
+      this.groupedMessages = this.smsService.groupMessagesByPhoneNumber(messages);
+    } catch (err) {
+      this.showToast('Failed to refresh messages.', 'danger');
+    } finally {
+      event.target.complete();
+    }
   }
 
   selectPhoneNumber(phoneNumber: string) {
@@ -75,10 +97,10 @@ export class SentMessagesPage implements OnInit {
   async presentSettingsModal() {
     const modal = await this.modalCtrl.create({
       component: SettingsModalComponent,
-      cssClass: 'settings-modal'
+      cssClass: 'settings-modal',
     });
 
-    modal.onDidDismiss().then(result => {
+    modal.onDidDismiss().then((result) => {
       const action = result.data?.action;
       if (action === 'setApiUrl') {
         this.presentApiUrlDialog();
@@ -92,7 +114,6 @@ export class SentMessagesPage implements OnInit {
 
   async presentApiUrlDialog() {
     const storedUrl = localStorage.getItem('customApiUrl') || '';
-
     const alert = await this.alertController.create({
       header: 'Set API URL',
       inputs: [
@@ -100,8 +121,8 @@ export class SentMessagesPage implements OnInit {
           name: 'apiUrl',
           type: 'text',
           placeholder: 'Leave blank to use default',
-          value: storedUrl || this.defaultApiUrl
-        }
+          value: storedUrl || this.defaultApiUrl,
+        },
       ],
       buttons: [
         { text: 'Cancel', role: 'cancel' },
@@ -110,24 +131,25 @@ export class SentMessagesPage implements OnInit {
           handler: (data) => {
             if (data.apiUrl?.trim()) {
               localStorage.setItem('customApiUrl', data.apiUrl.trim());
-              console.log('Custom API URL saved:', data.apiUrl);
+              this.showToast('API URL updated successfully.', 'success');
             } else {
               localStorage.removeItem('customApiUrl');
-              console.log('Custom API URL cleared, using default.');
+              this.showToast('Using default API URL.', 'success');
             }
-          }
-        }
-      ]
+          },
+        },
+      ],
     });
-
-    // After saving API URL
-    const toast = await this.toastCtrl.create({
-      message: 'API URL updated successfully',
-      duration: 2000,
-      color: 'success'
-    });
-    await toast.present();
 
     await alert.present();
+  }
+
+  private async showToast(message: string, color: string = 'primary') {
+    const toast = await this.toastCtrl.create({
+      message,
+      duration: 3000,
+      color,
+    });
+    await toast.present();
   }
 }

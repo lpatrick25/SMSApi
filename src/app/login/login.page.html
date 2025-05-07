@@ -1,31 +1,29 @@
-<div class="container d-flex align-items-center justify-content-center min-vh-100">
-  <div class="row w-100 justify-content-center">
-    <div class="col-md-6 col-lg-4">
-      <div class="card shadow-lg border-0 rounded-3 overflow-hidden">
-        <div class="card-header text-center py-4">
-          <!-- <img src="assets/bfp.webp" alt="App Logo" class="app-logo mb-3" /> -->
-          <strong>SMS API PORTAL</strong>
-        </div>
-        <div class="card-body p-5">
-          <form (ngSubmit)="login()">
-            <div class="mb-4">
-              <label for="email" class="form-label">Email</label>
-              <input [(ngModel)]="email" name="email" type="email" class="form-control shadow-sm border-0 rounded-3"
-                required />
-            </div>
-
-            <div class="mb-4">
-              <label for="password" class="form-label">Password</label>
-              <input [(ngModel)]="password" name="password" type="password"
-                class="form-control shadow-sm border-0 rounded-3" required />
-            </div>
-
-            <button type="submit" class="btn btn-primary w-100 py-2 rounded-3 shadow-sm">
-              Login
-            </button>
-          </form>
+<ion-content fullscreen>
+  <div class="container">
+    <div class="row w-100 justify-content-center">
+      <div class="col-md-6 col-lg-4">
+        <div class="card shadow-lg border-0 rounded-3">
+          <div class="card-header text-center py-4">
+            <img src="assets/bfp.webp" alt="App Logo" class="app-logo" />
+            <h3>SMS API Portal</h3>
+          </div>
+          <div class="card-body p-5">
+            <form (ngSubmit)="login()">
+              <div class="mb-4">
+                <label for="email" class="form-label">Email</label>
+                <input [(ngModel)]="email" name="email" type="email" class="form-control" required />
+              </div>
+              <div class="mb-4">
+                <label for="password" class="form-label">Password</label>
+                <input [(ngModel)]="password" name="password" type="password" class="form-control" required />
+              </div>
+              <ion-button type="submit" expand="block" color="primary" [disabled]="loading">
+                {{ loading ? 'Logging in...' : 'Login' }}
+              </ion-button>
+            </form>
+          </div>
         </div>
       </div>
     </div>
   </div>
-</div>
+</ion-content>
