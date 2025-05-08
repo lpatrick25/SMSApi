@@ -1,9 +1,11 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, NavigationEnd } from '@angular/router';
 import { AuthService } from './services/auth.service';
 import { ConnectivityService } from './services/connectivity.service';
-import type { PluginListenerHandle } from '@capacitor/core'; // Import the correct type for the listener
+import { Capacitor, type PluginListenerHandle } from '@capacitor/core';
 import { Subscription } from 'rxjs';
+import { StatusBar } from '@capacitor/status-bar';
+import { filter } from 'rxjs/operators';
 
 @Component({
   selector: 'app-root',
@@ -14,18 +16,36 @@ import { Subscription } from 'rxjs';
 export class AppComponent implements OnInit, OnDestroy {
   isLoggedIn = false;
   networkStatus = true;
+  currentRoute = '';
   private loginSub?: Subscription;
-  private networkSub?: PluginListenerHandle; // Update the type to PluginListenerHandle
+  private networkSub?: PluginListenerHandle;
+  private routerSub?: Subscription;
 
   constructor(
     private router: Router,
     private authService: AuthService,
     private connectivityService: ConnectivityService
-  ) {}
+  ) {
+    if (Capacitor.isNativePlatform()) {
+      this.initializeApp();
+    }
+  }
+
+  async initializeApp() {
+    try {
+      await StatusBar.setOverlaysWebView({ overlay: false });
+      await StatusBar.setBackgroundColor({ color: '#660000' });
+    } catch (error) {
+      console.error('StatusBar initialization failed:', error);
+      // Fallback to default color
+      await StatusBar.setBackgroundColor({ color: '#000000' }).catch(() => {});
+    }
+  }
 
   ngOnInit() {
     this.monitorLoginStatus();
     this.listenToNetworkChanges();
+    this.monitorRouteChanges();
   }
 
   monitorLoginStatus() {
@@ -35,7 +55,6 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   async listenToNetworkChanges() {
-    // Await the promise returned by startNetworkListener and assign the result to networkSub
     this.networkSub = await this.connectivityService.startNetworkListener((isConnected: boolean) => {
       this.networkStatus = isConnected;
       if (isConnected) {
@@ -44,11 +63,45 @@ export class AppComponent implements OnInit, OnDestroy {
     });
   }
 
+  monitorRouteChanges() {
+    this.routerSub = this.router.events
+      .pipe(filter((event) => event instanceof NavigationEnd))
+      .subscribe((event: NavigationEnd) => {
+        this.currentRoute = event.urlAfterRedirects;
+        if (Capacitor.isNativePlatform()) {
+          this.setStatusBarColor();
+        }
+      });
+  }
+
+  async setStatusBarColor() {
+    try {
+      const color = this.currentRoute === '/home' ? '#660000' : '#800000';
+      await StatusBar.setBackgroundColor({ color });
+    } catch (error) {
+      console.error('StatusBar color error:', error);
+    }
+  }
+
+  shouldShowFooter(): boolean {
+    return (
+      this.isLoggedIn &&
+      this.networkStatus &&
+      !['/login', '/loading'].includes(this.currentRoute)
+    );
+  }
+
+  isActiveTab(route: string): boolean {
+    return this.currentRoute === route;
+  }
+
   ngOnDestroy() {
-    // Remove the network listener when the component is destroyed
     this.networkSub?.remove();
     if (this.loginSub) {
       this.loginSub.unsubscribe();
+    }
+    if (this.routerSub) {
+      this.routerSub.unsubscribe();
     }
   }
 

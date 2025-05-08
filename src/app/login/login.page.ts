@@ -1,8 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { NavController, ToastController } from '@ionic/angular';
+import { AlertController, ModalController, NavController, ToastController } from '@ionic/angular';
 import { ConnectivityService } from '../services/connectivity.service';
 import { AuthService } from '../services/auth.service';
+import { ForgotPasswordModalComponent } from '../forgot-password-modal/forgot-password-modal.component';
 
 @Component({
   selector: 'app-login',
@@ -21,7 +22,9 @@ export class LoginPage implements OnInit {
     private navCtrl: NavController,
     private toastCtrl: ToastController,
     private connectivityService: ConnectivityService,
-    private authService: AuthService
+    private authService: AuthService,
+    private alertController: AlertController,
+    private modalCtrl: ModalController
   ) {}
 
   ngOnInit() {
@@ -71,16 +74,21 @@ export class LoginPage implements OnInit {
       .subscribe({
         next: async (res) => {
           this.loading = false;
-          if (res?.token) {
+          if (res?.status === 'success' && res?.token && res?.expires_at) {
             if (res.user.role === 'Admin' || res.user.role === 'Marshall') {
-              await this.authService.setToken(res.token);
-              this.navCtrl.navigateRoot('/home');
-              this.showToast('Login successful.', 'success');
+              try {
+                await this.authService.setToken(res.token, res.expires_at);
+                this.navCtrl.navigateRoot('/home');
+                this.showToast('Login successful.', 'success');
+              } catch (error) {
+                console.error('Failed to set token:', error);
+                this.showToast('Invalid token expiration data.', 'danger');
+              }
             } else {
               this.showToast('Not authorized.', 'danger');
             }
           } else {
-            this.showToast('Invalid response.', 'danger');
+            this.showToast('Invalid response from server.', 'danger');
           }
         },
         error: async (err) => {
@@ -89,6 +97,17 @@ export class LoginPage implements OnInit {
           this.showToast('Login failed. Please check your credentials.', 'danger');
         },
       });
+  }
+
+  async forgotPassword() {
+    const modal = await this.modalCtrl.create({
+      component: ForgotPasswordModalComponent,
+      cssClass: 'forgot-password-modal',
+      componentProps: {
+        networkStatus: this.networkStatus
+      }
+    });
+    await modal.present();
   }
 
   private async showToast(message: string, color: string = 'primary') {

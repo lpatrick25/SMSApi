@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { ModalController } from '@ionic/angular';
+import { ModalController, AlertController } from '@ionic/angular';
 
 @Component({
   selector: 'app-settings-modal',
@@ -9,7 +9,10 @@ import { ModalController } from '@ionic/angular';
 })
 export class SettingsModalComponent {
 
-  constructor(private modalCtrl: ModalController) { }
+  constructor(
+    private modalCtrl: ModalController,
+    private alertCtrl: AlertController
+  ) {}
 
   dismiss() {
     this.modalCtrl.dismiss();
@@ -19,8 +22,20 @@ export class SettingsModalComponent {
     this.modalCtrl.dismiss({ action: 'setApiUrl' });
   }
 
-  onLogout() {
-    this.modalCtrl.dismiss({ action: 'logout' });
+  async onLogout() {
+    const alert = await this.alertCtrl.create({
+      header: 'Confirm Logout',
+      message: 'Are you sure you want to log out?',
+      buttons: [
+        {
+          text: 'Logout',
+          role: 'destructive',
+          handler: () => this.modalCtrl.dismiss({ action: 'logout' }),
+        },
+        { text: 'Cancel', role: 'cancel' },
+      ],
+    });
+    await alert.present();
   }
 
 }
